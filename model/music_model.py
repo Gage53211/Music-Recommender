@@ -1,20 +1,24 @@
-import pandas as pd
 import os
-
+import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
+# TODO: Implement KNN for selection of tracks as randomly choosing 5 tracks does not yeild good results.
 
 class MusicModel ():
 
-    global features
-    global music_df
-    global path_to_data
+    features = None
+    music_df = None
+    path_to_data = None
+    kmeans = None
+    pca = None
+    scaler = None
+    labels_assigned = False
 
     def __init__ (self):
-        """ Initialization of path to dataset, pandas dataframe, and features to be used """
-        
+        """ Initialization of path to dataset, pandas dataframe, model, and features to be used """
+
         self.features = [
             'danceability',
             'energy',
@@ -29,63 +33,62 @@ class MusicModel ():
 
         self.path_to_data = os.path.join("data","dataset.csv")
         self.music_df = pd.read_csv(self.path_to_data).drop('Unnamed: 0', axis=1) 
+        self.kmeans = KMeans(n_clusters=12, n_init="auto", random_state=42)
 
 
-    def prediction(self, prediction_data, model, pca, scaler): 
+    def predict(self, prediction_data): 
         """
-        This function transforms the prediction data using the passed scaler and pca objects.
-        It also makes and returns the prediction.
-        """
-        
-        features_scaled = scaler.transform(prediction_data)
-        prediction_pca = pca.transform(features_scaled)
-
-        return model.predict(prediction_pca)
-        
-
-    def model (self, prediction_data):
-        """
-        This function is responisble for preforming scaling and pca on the original data.
-        It also passes the prediction data to the predict function. Once it gets the data
-        back, it chooses 5 random entries in the original data frame corrisponding to the
-        cluster the prediction made.
+        This function transforms the prediction data using the scaler and pca objects
+        defined by the "train_model" function. Currently, it returns 5 random samples
+        from the cluster that was chosen by kmeans. 
         """
 
-        print (self.music_df[self.features].head())
-        print (self.music_df.shape)
+        prediction_data = pd.DataFrame([prediction_data], columns=self.features)
 
-        # Standardize and conduct PCA
-        scaler = StandardScaler()
-        features_scaled = scaler.fit_transform(self.music_df[self.features])
+        # scale and conduct pca on input
+        prediction_data = self.scaler.transform(prediction_data)
+        prediction_data = self.pca.transform(prediction_data)
 
-        pca = PCA(n_components=0.85) 
-        pca.fit(features_scaled)
-        X_pca = pca.transform(features_scaled)
-        print(f"Number of components selected: {pca.n_components_}")
+        # make cluster prediction
+        cluster_prediction = self.kmeans.predict(prediction_data)
 
-        # Train the K-Means Model
-        kmeans = KMeans(n_clusters=15, n_init="auto", random_state=42).fit(X_pca)
+        # only assign lables once
+        if self.labels_assigned is False:
+            cluster_labels = self.kmeans.labels_
+            self.music_df['cluster_id'] = cluster_labels
+            self.labels_assigned = True
 
-        # Make The Prediction
-        pred_df = pd.DataFrame([prediction_data], columns=self.features)
-        
-        cluster_prediction = self.prediction(pred_df, kmeans, pca, scaler)
-        print (f"Predicted Cluster: {cluster_prediction}")
-
-        cluster_labels = kmeans.labels_
-        self.music_df['cluster_id'] = cluster_labels
-
+        # select 5 random samples from the cluster and return them
         prediction_result = self.music_df[self.music_df['cluster_id'] == cluster_prediction[0]].sample(n=5)
         return prediction_result
+
+
+    def train_model (self):
+        """ 
+        This function is responisble for preforming scaling and pca on the original data.
+        This function also fits the model to the transformed data.
+        """
+
+        # Standardize and conduct PCA
+        self.scaler = StandardScaler()
+        features_scaled = self.scaler.fit_transform(self.music_df[self.features])
+
+        self.pca = PCA(n_components=0.70) 
+        self.pca.fit(features_scaled)
+        X_pca = self.pca.transform(features_scaled)
+
+        # Train the K-Means Model
+        self.kmeans.fit(X_pca)
 
 
 if __name__ == "__main__":
 
     # Example prediction
-    
-    pred_data_values = [0.268, 0.461, 0.568, -9.235, 0.569, 0.00133, 0.132, 0.143, 87.017]
+    # 0.77,0.649,-6.824,0.194,0.108,0.000683,0.134,0.522,84.012
+    # danceability,energy,loudness,speechiness,acousticness,instrumentalness,liveness,valence,tempo
+
+    pred_data_values = [0.77, 0.649, -6.824, 0.194, 0.108, 0.000683, 0.134, 0.322, 84.012]
     K_model = MusicModel()
 
-    print(K_model.model(pred_data_values))
-
-
+    K_model.train_model()
+    print(K_model.predict(pred_data_values))
