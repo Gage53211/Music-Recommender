@@ -4,7 +4,6 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-# TODO: Implement KNN for selection of tracks as randomly choosing 5 tracks does not yeild good results.
 
 class MusicModel ():
 
@@ -15,6 +14,7 @@ class MusicModel ():
     pca = None
     scaler = None
     labels_assigned = False
+    X_pca = None
 
     def __init__ (self):
         """ Initialization of path to dataset, pandas dataframe, model, and features to be used """
@@ -33,7 +33,7 @@ class MusicModel ():
 
         self.path_to_data = os.path.join("data","dataset.csv")
         self.music_df = pd.read_csv(self.path_to_data).drop('Unnamed: 0', axis=1) 
-        self.kmeans = KMeans(n_clusters=12, n_init="auto", random_state=42)
+        self.kmeans = KMeans(n_clusters=500, init='k-means++', n_init="auto", random_state=42)
 
 
     def predict(self, prediction_data): 
@@ -59,8 +59,9 @@ class MusicModel ():
             self.labels_assigned = True
 
         # select 5 random samples from the cluster and return them
-        prediction_result = self.music_df[self.music_df['cluster_id'] == cluster_prediction[0]].sample(n=5)
-        return prediction_result
+        prediction_result = self.music_df[self.music_df['cluster_id'] == cluster_prediction[0]]
+        print(prediction_result.shape)
+        return prediction_result.sample(n=5)
 
 
     def train_model (self):
@@ -75,20 +76,29 @@ class MusicModel ():
 
         self.pca = PCA(n_components=0.70) 
         self.pca.fit(features_scaled)
-        X_pca = self.pca.transform(features_scaled)
+        self.X_pca = self.pca.transform(features_scaled)
 
         # Train the K-Means Model
-        self.kmeans.fit(X_pca)
-
-
+        self.kmeans.fit(self.X_pca)
+    
+    
 if __name__ == "__main__":
 
-    # Example prediction
-    # 0.77,0.649,-6.824,0.194,0.108,0.000683,0.134,0.522,84.012
+    # Example predictions
     # danceability,energy,loudness,speechiness,acousticness,instrumentalness,liveness,valence,tempo
 
-    pred_data_values = [0.77, 0.649, -6.824, 0.194, 0.108, 0.000683, 0.134, 0.322, 84.012]
+    # Drugs 3iiDWuaIzuGKZezHvQY4GA
+    # pred_data_values = [0.77, 0.649, -6.824, 0.194, 0.108, 0.000683, 0.134, 0.522, 84.012]
+
+    # I beg you 5kKSQULHCPFE7CKMPrkAtP
+    # pred_data_values = [0.456, 0.893, -2.825, 0.0813, 0.00321, 0.0, 0.121, 0.478, 127.884]
+
+    # fly me to the moon pt 2 5V0kQxkQeXNTnGNLRGZ6bX
+    pred_data_values = [0.322, 0.00207, -35.061, 0.0523, 0.996, 0.889, 0.0822, 0.149, 75.769]
+    
+    
     K_model = MusicModel()
 
     K_model.train_model()
     print(K_model.predict(pred_data_values))
+  
