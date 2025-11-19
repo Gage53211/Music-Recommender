@@ -1,10 +1,23 @@
+"""
+*******************************************************************
+                        -- Music Model --
+
+Description: A model that uses a combination of k-means and k-
+             nearest neighbor to recommend a user a number of
+             songs based on their provided preferences.
+
+Name: Gage Mather
+
+*******************************************************************
+"""
+
+
 import os
+import random
 import pandas as pd
 from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
+from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
-
-# TODO: Implement KNN for selection of tracks as randomly choosing 5 tracks does not yeild good results.
 
 class MusicModel ():
 
@@ -12,12 +25,11 @@ class MusicModel ():
     music_df = None
     path_to_data = None
     kmeans = None
-    pca = None
+    n_neighbors = None
     scaler = None
-    labels_assigned = False
 
     def __init__ (self):
-        """ Initialization of path to dataset, pandas dataframe, model, and features to be used """
+        """ Initialization of path to dataset, pandas dataframe, models, and features to be used """
 
         self.features = [
             'danceability',
@@ -33,62 +45,92 @@ class MusicModel ():
 
         self.path_to_data = os.path.join("data","dataset.csv")
         self.music_df = pd.read_csv(self.path_to_data).drop('Unnamed: 0', axis=1) 
-        self.kmeans = KMeans(n_clusters=12, n_init="auto", random_state=42)
-
+        self.kmeans = KMeans(n_clusters=500, n_init="auto", random_state=random.randint(42, 47))
+        self.n_neighbors = NearestNeighbors(n_neighbors=5)
 
     def predict(self, prediction_data): 
         """
-        This function transforms the prediction data using the scaler and pca objects
-        defined by the "train_model" function. Currently, it returns 5 random samples
-        from the cluster that was chosen by kmeans. 
+        This function scales the prediction and feeds it into the k-means model. 
+        Once a cluster prediction is obtained from k-means, we select that cluster
+        and fit that data to a k-nearest-neighbor model. We then feed the prediction data
+        into the knn model and return the five closest songs.
         """
+
+        assert prediction_data != None
 
         prediction_data = pd.DataFrame([prediction_data], columns=self.features)
 
-        # scale and conduct pca on input
-        prediction_data = self.scaler.transform(prediction_data)
-        prediction_data = self.pca.transform(prediction_data)
-
+        # scale input
+        transformed_data = self.scaler.transform(prediction_data)
+        
         # make cluster prediction
-        cluster_prediction = self.kmeans.predict(prediction_data)
+        cluster_prediction = self.kmeans.predict(transformed_data)
 
-        # only assign lables once
-        if self.labels_assigned is False:
-            cluster_labels = self.kmeans.labels_
-            self.music_df['cluster_id'] = cluster_labels
-            self.labels_assigned = True
+        # get cluster data and use it to train knn model
+        prediction_result = self.music_df[self.music_df['cluster_id'] == cluster_prediction[0]]
+        self.n_neighbors.fit(prediction_result[self.features])
+        print(prediction_data)
 
-        # select 5 random samples from the cluster and return them
-        prediction_result = self.music_df[self.music_df['cluster_id'] == cluster_prediction[0]].sample(n=5)
-        return prediction_result
+        # get indicies of closest songs to prediction inside cluster and return
+        indicies = self.n_neighbors.kneighbors(prediction_data, return_distance=False)
+        return prediction_result.iloc[indicies[0]]
 
 
     def train_model (self):
         """ 
-        This function is responisble for preforming scaling and pca on the original data.
-        This function also fits the model to the transformed data.
+        This function makes a scaled copy of the data and uses
+        it to fit the k-means model. After the model is fit, a 
+        new column in the original dataset is created to hold
+        cluster assignments.
         """
 
-        # Standardize and conduct PCA
+        # Standardize
         self.scaler = StandardScaler()
-        features_scaled = self.scaler.fit_transform(self.music_df[self.features])
-
-        self.pca = PCA(n_components=0.70) 
-        self.pca.fit(features_scaled)
-        X_pca = self.pca.transform(features_scaled)
+        features_scaled = self.scaler.fit_transform(self.music_df[self.features]) 
 
         # Train the K-Means Model
-        self.kmeans.fit(X_pca)
+        self.kmeans.fit(features_scaled)
+
+        # Assign each row a cluster
+        cluster_labels = self.kmeans.labels_
+        self.music_df['cluster_id'] = cluster_labels
 
 
 if __name__ == "__main__":
 
-    # Example prediction
-    # 0.77,0.649,-6.824,0.194,0.108,0.000683,0.134,0.522,84.012
-    # danceability,energy,loudness,speechiness,acousticness,instrumentalness,liveness,valence,tempo
+    # data format
+    # danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, tempo (in that order)
 
-    pred_data_values = [0.77, 0.649, -6.824, 0.194, 0.108, 0.000683, 0.134, 0.322, 84.012]
+    # Drugs 3iiDWuaIzuGKZezHvQY4GA
+    pred_data_values = [0.77, 0.649, -6.824, 0.194, 0.108, 0.000683, 0.134, 0.522, 84.012]
+
+    # I beg you 5kKSQULHCPFE7CKMPrkAtP
+    # [[-0.6384647  1.00035493  1.08045744 -0.03170389 -0.93738391 -0.50411187 -0.4861559  0.01516536  0.19134533]]
+    # pred_data_values = [0.456, 0.893, -2.825, 0.0813, 0.00321, 0.0, 0.121, 0.478, 127.884]
+
+    # fly me to the moon pt 2 5V0kQxkQeXNTnGNLRGZ6bX
+    # pred_data_values = [0.322, 0.00207, -35.061, 0.0523, 0.996, 0.889, 0.0822, 0.149, 75.769]
+
+
+    features = [
+            'track_id',
+            'track_name',
+            'danceability',
+            'energy',
+            'loudness',
+            'speechiness',
+            'acousticness',
+            'instrumentalness',
+            'liveness',
+            'valence',
+            'tempo'
+        ]
+    
     K_model = MusicModel()
 
     K_model.train_model()
-    print(K_model.predict(pred_data_values))
+    pred_df = K_model.predict(pred_data_values)
+
+    print (pred_df.describe())
+    print (pred_df[features])
+    print (pred_data_values)
