@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block form %}
+
+    {% for catagory in form.errors %}
+        {% for error in catagory %}
+            {{ error }}
+        {% endfor %}
+    {% endfor %}
+
+    <h1 class="text-center">Lets Make A Prediction</h1>
+    <div class="container">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <p class="text-center">
+                {{ form.danceability.label }}<br>
+                {{ form.danceability(min=0, max=1) }}
+            </p>
+            <p class="text-center">
+                {{ form.energy.label }}<br>
+                {{ form.energy(min=0, max=1) }}
+            </p>
+            <p class="text-center">
+                {{ form.loudness.label }}<br>
+                {{ form.loudness (min= -50, max=5) }}
+            </p>
+            <p class="text-center">
+                {{ form.acousticness.label }}<br>
+                {{ form.acousticness(min=0, max=1) }}
+            </p>
+            <p class="text-center">
+                {{ form.instrumentalness.label }}<br>
+                {{ form.instrumentalness(min=0, max=1) }}
+            </p>
+            <p class="text-center">
+                {{ form.liveness.label }}<br>
+                {{ form.liveness(min=0, max=1) }}
+            </p>
+            <p class="text-center">
+                {{ form.valence.label }}<br>
+                {{ form.valence(min=0, max=1) }}
+            </p>
+            <p class="text-center">
+                {{ form.tempo.label }}<br>
+                {{ form.tempo(min=50, max=250) }}
+            </p>
+            <p class="text-center">{{ form.submit() }}</p>
+        </form>
+    </div>
+{% endblock %}
