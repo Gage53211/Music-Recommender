@@ -11,7 +11,6 @@ Name: Gage Mather
 *******************************************************************
 """
 
-
 import os
 import random
 import pandas as pd
@@ -35,7 +34,6 @@ class MusicModel ():
             'danceability',
             'energy',
             'loudness',
-            'speechiness',
             'acousticness',
             'instrumentalness',
             'liveness',
@@ -45,8 +43,11 @@ class MusicModel ():
 
         self.path_to_data = os.path.join("data","dataset.csv")
         self.music_df = pd.read_csv(self.path_to_data).drop('Unnamed: 0', axis=1) 
-        self.kmeans = KMeans(n_clusters=500, n_init="auto", random_state=random.randint(42, 47))
+        self.kmeans = KMeans(n_clusters=500, n_init="auto", random_state=random.randint(1, 5)) 
         self.n_neighbors = NearestNeighbors(n_neighbors=5)
+
+        # print (self.music_df[features].describe())
+
 
     def predict(self, prediction_data): 
         """
@@ -56,24 +57,19 @@ class MusicModel ():
         into the knn model and return the five closest songs.
         """
 
-        assert prediction_data != None
-
+        assert prediction_data != None and len(prediction_data) == 8
+        
         prediction_data = pd.DataFrame([prediction_data], columns=self.features)
-
-        # scale input
+        print (prediction_data)
         transformed_data = self.scaler.transform(prediction_data)
         
-        # make cluster prediction
         cluster_prediction = self.kmeans.predict(transformed_data)
 
-        # get cluster data and use it to train knn model
         prediction_result = self.music_df[self.music_df['cluster_id'] == cluster_prediction[0]]
         self.n_neighbors.fit(prediction_result[self.features])
-        print(prediction_data)
 
-        # get indicies of closest songs to prediction inside cluster and return
         indicies = self.n_neighbors.kneighbors(prediction_data, return_distance=False)
-        return prediction_result.iloc[indicies[0]]
+        return prediction_result.iloc[indicies[0]]['track_id']
 
 
     def train_model (self):
@@ -84,32 +80,29 @@ class MusicModel ():
         cluster assignments.
         """
 
-        # Standardize
         self.scaler = StandardScaler()
         features_scaled = self.scaler.fit_transform(self.music_df[self.features]) 
 
-        # Train the K-Means Model
         self.kmeans.fit(features_scaled)
 
-        # Assign each row a cluster
         cluster_labels = self.kmeans.labels_
         self.music_df['cluster_id'] = cluster_labels
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
 
     # data format
-    # danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, tempo (in that order)
+    # danceability, energy, loudness, acousticness, instrumentalness, liveness, valence, tempo (in that order)
 
     # Drugs 3iiDWuaIzuGKZezHvQY4GA
-    pred_data_values = [0.77, 0.649, -6.824, 0.194, 0.108, 0.000683, 0.134, 0.522, 84.012]
+    # pred_data_values = [0.77, 0.649, -6.824, 0.108, 0.000683, 0.134, 0.522, 84.012]
 
     # I beg you 5kKSQULHCPFE7CKMPrkAtP
     # [[-0.6384647  1.00035493  1.08045744 -0.03170389 -0.93738391 -0.50411187 -0.4861559  0.01516536  0.19134533]]
-    # pred_data_values = [0.456, 0.893, -2.825, 0.0813, 0.00321, 0.0, 0.121, 0.478, 127.884]
+    pred_data_values = [0.456, 0.893, -2.825,  0.00321, 0.0, 0.121, 0.478, 127.884]
 
     # fly me to the moon pt 2 5V0kQxkQeXNTnGNLRGZ6bX
-    # pred_data_values = [0.322, 0.00207, -35.061, 0.0523, 0.996, 0.889, 0.0822, 0.149, 75.769]
+    # pred_data_values = [0.322, 0.00207, -35.061, 0.996, 0.889, 0.0822, 0.149, 75.769]
 
 
     features = [
@@ -118,7 +111,6 @@ if __name__ == "__main__":
             'danceability',
             'energy',
             'loudness',
-            'speechiness',
             'acousticness',
             'instrumentalness',
             'liveness',
@@ -131,6 +123,6 @@ if __name__ == "__main__":
     K_model.train_model()
     pred_df = K_model.predict(pred_data_values)
 
-    print (pred_df.describe())
-    print (pred_df[features])
+    #print (pred_df.describe())
+    print (pred_df)
     print (pred_data_values)
