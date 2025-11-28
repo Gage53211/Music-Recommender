@@ -45,9 +45,7 @@ class MusicModel ():
         self.music_df = pd.read_csv(self.path_to_data).drop('Unnamed: 0', axis=1) 
         self.kmeans = KMeans(n_clusters=500, n_init="auto", random_state=random.randint(1, 5)) 
         self.n_neighbors = NearestNeighbors(n_neighbors=5)
-
-        # print (self.music_df[features].describe())
-
+        
 
     def predict(self, prediction_data): 
         """
@@ -58,7 +56,9 @@ class MusicModel ():
         """
 
         assert prediction_data != None and len(prediction_data) == 8
-        
+
+        # Dimensionality reduction via PCA was originally conducted here but the need
+        # for it vanished.
         prediction_data = pd.DataFrame([prediction_data], columns=self.features)
         print (prediction_data)
         transformed_data = self.scaler.transform(prediction_data)
