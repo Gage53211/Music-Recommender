@@ -2,7 +2,7 @@ from app import app
 import pandas as pd
 from app.forms import SubmissionForm
 from model.music_model import MusicModel
-from flask import render_template, flash
+from flask import render_template, flash, url_for
 
 model = MusicModel()
 model.train_model()
@@ -25,9 +25,6 @@ def index():
 
         flash('Prediction Made!', 'success')
         results = model.predict(form_data)
-        print (results)
-
-        # redirect back to this page
         return render_template('base.html', form=form, results=results)
 
     return render_template('form.html', form=form, results=pd.DataFrame())

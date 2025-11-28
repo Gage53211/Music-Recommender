@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, DecimalField, IntegerField
 from wtforms.widgets import RangeInput
-from wtforms.validators import DataRequired, Length, ValidationError, NumberRange
+from wtforms.validators import DataRequired, NumberRange
+from wtforms import SubmitField, DecimalField, IntegerField
 
 #             'danceability',
 #             'energy',
