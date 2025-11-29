@@ -93,12 +93,8 @@ if __name__ == "__main__":
 
     # data format
     # danceability, energy, loudness, acousticness, instrumentalness, liveness, valence, tempo (in that order)
-
-    # Drugs 3iiDWuaIzuGKZezHvQY4GA
-    # pred_data_values = [0.77, 0.649, -6.824, 0.108, 0.000683, 0.134, 0.522, 84.012]
-
+    
     # I beg you 5kKSQULHCPFE7CKMPrkAtP
-    # [[-0.6384647  1.00035493  1.08045744 -0.03170389 -0.93738391 -0.50411187 -0.4861559  0.01516536  0.19134533]]
     pred_data_values = [0.456, 0.893, -2.825,  0.00321, 0.0, 0.121, 0.478, 127.884]
 
     # fly me to the moon pt 2 5V0kQxkQeXNTnGNLRGZ6bX
