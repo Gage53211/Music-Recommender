@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block form %}
+
+    {% for catagory in form.errors %}
+        {% for error in catagory %}
+            {{ error }}
+        {% endfor %}
+    {% endfor %}
+
+    <h1 class="text-center">Lets Make A Prediction</h1>
+    <div class="container">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            
+            <div class="container text-center questions" style="width: 50%;">
+                <h6> 
+                    Do you like your music to be danceable? 
+                    In other words, do you like music with a predictable rhythm? 
+                    Or do you like music that's more chaotic?
+                </h6>
+                <div class="row align-items-start">
+                    <div class="col">
+                        <h4 class="d-text">Chaotic</h4>
+                    </div>
+                    <div class="col">
+                        <p class="text-center" style="padding-top: 5%;">
+                            {{ form.danceability(min=0.1, max=1, class="form-range") }}
+                         </p>
+                    </div>
+                    <div class="col">
+                        <h4 class="d-text">Rythmic</h4>
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="container text-center questions" style="width: 50%;">
+                <h6> 
+                    When you listen to music, do you like more energetic songs 
+                    (fast, loud, intense) or more laid back songs (slow, quiet, chill).
+                </h6>
+                <div class="row align-items-start">
+                    <div class="col">
+                        <h4 class="d-text">Laid Back</h4>
+                    </div>
+                    <div class="col">
+                        <p class="text-center" style="padding-top: 5%;">
+                            {{ form.energy(min=0.1, max=1, class="form-range") }}
+                         </p>
+                    </div>
+                    <div class="col">
+                        <h4 class="d-text">Energetic</h4>
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="container text-center questions" style="width: 50%;">
+                <h6> 
+                    Do you tend to prefer loud music? 
+                    Or, do you prefer music that's more quiet.
+                </h6>
+                <div class="row align-items-start">
+                    <div class="col">
+                        <h4 class="d-text">Quiet</h4>
+                    </div>
+                    <div class="col">
+                        <p class="text-center" style="padding-top: 5%;">
+                            {{ form.loudness (min= -50, max=5, class="form-range") }}
+                         </p>
+                    </div>
+                    <div class="col">
+                        <h4 class="d-text">Loud</h4>
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="container text-center questions" style="width: 50%;">
+                <h6> 
+                    Do you tend to prefer loud music? 
+                    Or, do you prefer music that's more quiet.
+                </h6>
+                <div class="row align-items-start">
+                    <div class="col">
+                        <h4 class="d-text">Electronic</h4>
+                    </div>
+                    <div class="col">
+                        <p class="text-center" style="padding-top: 5%;">
+                            {{ form.acousticness(min=0.1, max=1, class="form-range") }}
+                         </p>
+                    </div>
+                    <div class="col">
+                        <h4 class="d-text">Natural</h4>
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="container text-center questions" style="width: 50%;">
+                <h6> 
+                    Do you like songs that are more instrumental? 
+                    That is, do you prefer songs that feature vocals more or songs that feature instruments more.
+                </h6>
+                <div class="row align-items-start">
+                    <div class="col">
+                        <h4 class="d-text">Vocal</h4>
+                    </div>
+                    <div class="col">
+                        <p class="text-center" style="padding-top: 5%;">
+                            {{ form.instrumentalness(min=0.1, max=1, class="form-range") }}
+                         </p>
+                    </div>
+                    <div class="col">
+                        <h4 class="d-text">Instrumental</h4>
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="container text-center questions" style="width: 50%;">
+                <h6> 
+                    Do you like songs that sound like they are being performed live (minor mistakes, stage reverb, etc)? 
+                    Or, do you prefer songs that sound arranged.
+                </h6>
+                <div class="row align-items-start">
+                    <div class="col">
+                        <h4 class="d-text">Not Live</h4>
+                    </div>
+                    <div class="col">
+                        <p class="text-center" style="padding-top: 5%;">
+                            {{ form.liveness(min=0.1, max=1, class="form-range") }}
+                         </p>
+                    </div>
+                    <div class="col">
+                        <h4 class="d-text">Live</h4>
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="container text-center questions" style="width: 50%;">
+                <h6> 
+                    Are you into songs that sound more happy? Or are you into songs that sound more sad?
+                </h6>
+                <div class="row align-items-start">
+                    <div class="col">
+                        <h4 class="d-text">Sad</h4>
+                    </div>
+                    <div class="col">
+                        <p class="text-center" style="padding-top: 5%;">
+                            {{ form.valence(min=0.1, max=1, class="form-range") }}
+                         </p>
+                    </div>
+                    <div class="col">
+                        <h4 class="d-text">Happy</h4>
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div class="container text-center questions" style="width: 50%;">
+                <h6> 
+                    Are you into songs that sound more happy? Or are you into songs that sound more sad?
+                </h6>
+                <div class="row align-items-start">
+                    <div class="col">
+                        <h4 class="d-text">Slow</h4>
+                    </div>
+                    <div class="col">
+                        <p class="text-center" style="padding-top: 5%;">
+                            {{ form.tempo(min=50, max=250, class="form-range") }}
+                        </p>
+                    </div>
+                    <div class="col">
+                        <h4 class="d-text">Fast</h4>
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <p class="text-center">{{ form.submit(class="btn btn-success") }}</p>
+        </form>
+    </div>
+{% endblock %}

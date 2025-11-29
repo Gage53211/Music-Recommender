@@ -1,0 +1,24 @@
+@media screen and (max-width: 1200px) {
+
+    .d-text {
+      font-size: small;
+    }
+
+}
+
+.container {
+  background-color: #dafae2;
+  border-radius: 10px;
+  padding-top: .5%;
+  padding-bottom: .5%;
+}
+
+.body {
+  background-color: #f0faef;
+}
+
+.questions {
+  background-color: #4fe07f;
+  padding-top: .5%;
+  padding-bottom: .5%;
+}
