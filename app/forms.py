@@ -52,6 +52,6 @@ class SubmissionForm(FlaskForm):
     tempo = IntegerField('Tempo', validators=[
         DataRequired(),
         NumberRange(50, 250)
-    ], widget=RangeInput(10))
+    ], widget=RangeInput(5))
 
     submit = SubmitField('Find Music')
